@@ -341,6 +341,79 @@ class MaxStepsGrader(BaseGrader):
         )
 
 
+class MaxToolCallsGrader(BaseGrader):
+    """Check that agent completed within maximum tool calls.
+
+    Unlike max_steps which counts all trace steps (including internal
+    framework steps captured by OTel), this only counts actual tool calls.
+    """
+
+    name = "max_tool_calls"
+
+    def __init__(self, max_tool_calls: int | None = None) -> None:
+        self.max_tool_calls = max_tool_calls
+
+    def grade(self, trace: Trace, test_case: EvalCase) -> GradeResult:
+        """Check tool call count."""
+        max_tool_calls = self.max_tool_calls
+        if max_tool_calls is None:
+            max_tool_calls = test_case.expected.max_tool_calls
+
+        if max_tool_calls is None:
+            return GradeResult.passed_result(self.name, "No max tool calls defined")
+
+        actual = len(trace.tool_calls)
+
+        if actual <= max_tool_calls:
+            return GradeResult.passed_result(
+                self.name,
+                f"Made {actual} tool calls (max: {max_tool_calls})",
+            )
+
+        return GradeResult.failed_result(
+            self.name,
+            f"Too many tool calls: {actual} > {max_tool_calls}",
+            expected=max_tool_calls,
+            actual=actual,
+        )
+
+
+class MaxLLMCallsGrader(BaseGrader):
+    """Check that agent completed within maximum LLM calls.
+
+    Counts only LLM call steps, not internal framework steps.
+    """
+
+    name = "max_llm_calls"
+
+    def __init__(self, max_llm_calls: int | None = None) -> None:
+        self.max_llm_calls = max_llm_calls
+
+    def grade(self, trace: Trace, test_case: EvalCase) -> GradeResult:
+        """Check LLM call count."""
+        max_llm_calls = self.max_llm_calls
+        if max_llm_calls is None:
+            max_llm_calls = test_case.expected.max_llm_calls
+
+        if max_llm_calls is None:
+            return GradeResult.passed_result(self.name, "No max LLM calls defined")
+
+        actual = len(trace.llm_calls)
+
+        if actual <= max_llm_calls:
+            return GradeResult.passed_result(
+                self.name,
+                f"Made {actual} LLM calls (max: {max_llm_calls})",
+            )
+
+        return GradeResult.failed_result(
+            self.name,
+            f"Too many LLM calls: {actual} > {max_llm_calls}",
+            expected=max_llm_calls,
+            actual=actual,
+        )
+
+
 class TaskCompletedGrader(BaseGrader):
     """Check if the agent completed the task (based on trace status)."""
 

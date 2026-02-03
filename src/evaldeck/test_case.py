@@ -26,6 +26,8 @@ class ExpectedBehavior(BaseModel):
     # Execution expectations
     max_steps: int | None = None
     min_steps: int | None = None
+    max_tool_calls: int | None = None
+    max_llm_calls: int | None = None
     task_completed: bool | None = None
 
     # Custom assertions (for code-based graders)

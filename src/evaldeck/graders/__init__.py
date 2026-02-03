@@ -5,7 +5,9 @@ from evaldeck.graders.code import (
     ContainsGrader,
     CustomGrader,
     EqualsGrader,
+    MaxLLMCallsGrader,
     MaxStepsGrader,
+    MaxToolCallsGrader,
     NotContainsGrader,
     RegexGrader,
     TaskCompletedGrader,
@@ -28,6 +30,8 @@ __all__ = [
     "ToolNotCalledGrader",
     "ToolOrderGrader",
     "MaxStepsGrader",
+    "MaxToolCallsGrader",
+    "MaxLLMCallsGrader",
     "TaskCompletedGrader",
     "CustomGrader",
     # Model-based

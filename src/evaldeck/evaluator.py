@@ -12,7 +12,9 @@ from evaldeck.graders import (
     BaseGrader,
     ContainsGrader,
     LLMGrader,
+    MaxLLMCallsGrader,
     MaxStepsGrader,
+    MaxToolCallsGrader,
     TaskCompletedGrader,
     ToolCalledGrader,
     ToolNotCalledGrader,
@@ -123,6 +125,12 @@ class Evaluator:
 
         if expected.max_steps is not None:
             graders.append(MaxStepsGrader())
+
+        if expected.max_tool_calls is not None:
+            graders.append(MaxToolCallsGrader())
+
+        if expected.max_llm_calls is not None:
+            graders.append(MaxLLMCallsGrader())
 
         if expected.task_completed is not None:
             graders.append(TaskCompletedGrader())
