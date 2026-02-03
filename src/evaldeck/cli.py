@@ -6,12 +6,13 @@ import sys
 from pathlib import Path
 
 import click
-from evaldeck.config import EvaldeckConfig, generate_default_config, generate_example_test
-from evaldeck.results import EvaluationResult, GradeStatus, RunResult
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+from evaldeck.config import EvaldeckConfig, generate_default_config, generate_example_test
+from evaldeck.results import EvaluationResult, GradeStatus, RunResult
 
 console = Console()
 

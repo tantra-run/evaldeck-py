@@ -18,6 +18,8 @@ Usage:
 
 from evaldeck.integrations.opentelemetry import (
     EvaldeckSpanProcessor,
+)
+from evaldeck.integrations.opentelemetry import (
     setup_tracing as setup_otel_tracing,
 )
 

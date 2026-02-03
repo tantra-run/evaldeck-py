@@ -1,8 +1,7 @@
 """Tests for trace module."""
 
-import pytest
 
-from evaldeck import Trace, Step, StepType, TraceStatus
+from evaldeck import Step, StepType, Trace, TraceStatus
 
 
 class TestStep:

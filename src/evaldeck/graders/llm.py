@@ -132,7 +132,9 @@ REASON: Your explanation
         try:
             from openai import OpenAI
         except ImportError:
-            raise ImportError("OpenAI package not installed. Run: pip install evaldeck[openai]")
+            raise ImportError(
+                "OpenAI package not installed. Run: pip install evaldeck[openai]"
+            ) from None
 
         client = OpenAI(api_key=self._get_api_key())
         response = client.chat.completions.create(
@@ -147,7 +149,9 @@ REASON: Your explanation
         try:
             from openai import AsyncOpenAI
         except ImportError:
-            raise ImportError("OpenAI package not installed. Run: pip install evaldeck[openai]")
+            raise ImportError(
+                "OpenAI package not installed. Run: pip install evaldeck[openai]"
+            ) from None
 
         client = AsyncOpenAI(api_key=self._get_api_key())
         response = await client.chat.completions.create(
@@ -164,7 +168,7 @@ REASON: Your explanation
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"
-            )
+            ) from None
 
         client = Anthropic(api_key=self._get_api_key())
         response = client.messages.create(
@@ -181,7 +185,7 @@ REASON: Your explanation
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"
-            )
+            ) from None
 
         client = AsyncAnthropic(api_key=self._get_api_key())
         response = await client.messages.create(

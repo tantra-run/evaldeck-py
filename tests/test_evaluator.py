@@ -4,6 +4,7 @@ import asyncio
 import time
 
 import pytest
+
 from evaldeck import (
     EvalCase,
     EvalSuite,

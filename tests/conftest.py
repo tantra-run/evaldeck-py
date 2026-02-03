@@ -2,7 +2,7 @@
 
 import pytest
 
-from evaldeck import Trace, Step, EvalCase, ExpectedBehavior
+from evaldeck import EvalCase, ExpectedBehavior, Step, Trace
 
 
 @pytest.fixture
