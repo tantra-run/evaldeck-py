@@ -165,14 +165,36 @@ Useful for validating structured output formats.
 
 #### max_steps
 
-Maximum allowed steps:
+Maximum allowed steps (all trace steps including internal framework steps):
 
 ```yaml
 expected:
-  max_steps: 5
+  max_steps: 20
 ```
 
-Ensures the agent doesn't take unnecessarily long paths.
+Note: When using OpenTelemetry instrumentation, step counts include all captured spans. For more intuitive limits, use `max_tool_calls` or `max_llm_calls` instead.
+
+#### max_tool_calls
+
+Maximum allowed tool calls:
+
+```yaml
+expected:
+  max_tool_calls: 5
+```
+
+Only counts actual tool invocations, not internal framework steps. Recommended over `max_steps` for most use cases.
+
+#### max_llm_calls
+
+Maximum allowed LLM calls:
+
+```yaml
+expected:
+  max_llm_calls: 3
+```
+
+Limits how many times the agent calls the LLM. Useful for controlling costs and preventing reasoning loops.
 
 #### min_steps
 

@@ -251,7 +251,7 @@ Actual calls:   [A, C, B]        → FAIL (C before B)
 
 ### MaxStepsGrader
 
-Enforces a maximum step count.
+Enforces a maximum step count (counts all trace steps including internal framework steps).
 
 **YAML:**
 
@@ -268,7 +268,53 @@ from evaldeck.graders import MaxStepsGrader
 grader = MaxStepsGrader(max_steps=10)
 ```
 
-**Use case:** Ensure agent efficiency—an agent taking 20 steps for a 3-step task is wasting resources.
+**Note:** When using OpenTelemetry instrumentation, step counts include all captured spans (LLM calls, parsing, internal framework steps). For more intuitive limits based on actual tool calls, use `MaxToolCallsGrader` instead.
+
+---
+
+### MaxToolCallsGrader
+
+Enforces a maximum number of tool calls.
+
+**YAML:**
+
+```yaml
+expected:
+  max_tool_calls: 5
+```
+
+**Python:**
+
+```python
+from evaldeck.graders import MaxToolCallsGrader
+
+grader = MaxToolCallsGrader(max_tool_calls=5)
+```
+
+**Use case:** Ensure agent efficiency by limiting actual tool invocations. Unlike `max_steps`, this only counts tool calls, not internal framework steps captured by OpenTelemetry.
+
+---
+
+### MaxLLMCallsGrader
+
+Enforces a maximum number of LLM calls.
+
+**YAML:**
+
+```yaml
+expected:
+  max_llm_calls: 3
+```
+
+**Python:**
+
+```python
+from evaldeck.graders import MaxLLMCallsGrader
+
+grader = MaxLLMCallsGrader(max_llm_calls=3)
+```
+
+**Use case:** Control costs and latency by limiting how many times the agent calls the LLM. Useful for ensuring the agent doesn't get stuck in reasoning loops.
 
 ---
 

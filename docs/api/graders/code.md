@@ -58,6 +58,20 @@ Deterministic graders for rule-based evaluation.
 
 ---
 
+::: evaldeck.graders.MaxToolCallsGrader
+    options:
+      show_root_heading: true
+      show_source: true
+
+---
+
+::: evaldeck.graders.MaxLLMCallsGrader
+    options:
+      show_root_heading: true
+      show_source: true
+
+---
+
 ::: evaldeck.graders.TaskCompletedGrader
     options:
       show_root_heading: true
