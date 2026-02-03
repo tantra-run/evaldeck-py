@@ -9,7 +9,7 @@ description = "The evaluation framework for AI agents. Pytest for agents."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
-authors = [{ name = "Evaldeck Contributors" }]
+authors = [{ name = "Tantra Run Team" }]
 keywords = [
     "ai",
     "agents",
@@ -65,10 +65,10 @@ docs = [
 evaldeck = "evaldeck.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/evaldeck-ai/evaldeck"
-Documentation = "https://evaldeck.dev"
-Repository = "https://github.com/evaldeck-ai/evaldeck"
-Issues = "https://github.com/evaldeck-ai/evaldeck/issues"
+Homepage = "https://github.com/tantra-run/evaldeck-py"
+Documentation = "https://tantra-run.github.io/evaldeck-py/"
+Repository = "https://github.com/tantra-run/evaldeck-py"
+Issues = "https://github.com/tantra-run/evaldeck-py/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/evaldeck"]

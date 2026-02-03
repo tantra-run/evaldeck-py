@@ -294,7 +294,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
 # Setup development environment
-git clone https://github.com/evaldeck-ai/evaldeck.git
+git clone https://github.com/tantra-run/evaldeck-py.git
 cd evaldeck
 pip install -e ".[dev]"
 pre-commit install

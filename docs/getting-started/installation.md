@@ -116,7 +116,7 @@ For contributing to Evaldeck or running from source:
 
 ```bash
 # Clone the repository
-git clone https://github.com/evaldeck-ai/evaldeck.git
+git clone https://github.com/tantra-run/evaldeck-py.git
 cd evaldeck
 
 # Create virtual environment

@@ -13,7 +13,7 @@ Set up your environment for Evaldeck development.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/evaldeck-ai/evaldeck.git
+git clone https://github.com/tantra-run/evaldeck-py.git
 cd evaldeck
 ```
 

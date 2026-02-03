@@ -213,7 +213,7 @@ To add a new metric:
 
 ## Getting Help
 
-- Open a [Discussion](https://github.com/evaldeck-ai/evaldeck/discussions) for questions
+- Open a [Discussion](https://github.com/tantra-run/evaldeck-py/discussions) for questions
 - Join our Discord (coming soon)
 - Tag maintainers on complex issues
 

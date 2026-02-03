@@ -4,8 +4,8 @@ Thank you for your interest in contributing to Evaldeck!
 
 ## Ways to Contribute
 
-- **Bug Reports** - Found a bug? [Open an issue](https://github.com/evaldeck-ai/evaldeck/issues)
-- **Feature Requests** - Have an idea? [Start a discussion](https://github.com/evaldeck-ai/evaldeck/discussions)
+- **Bug Reports** - Found a bug? [Open an issue](https://github.com/tantra-run/evaldeck-py/issues)
+- **Feature Requests** - Have an idea? [Start a discussion](https://github.com/tantra-run/evaldeck-py/discussions)
 - **Code Contributions** - Fix bugs, add features, improve docs
 - **Documentation** - Improve guides, add examples, fix typos
 
@@ -13,7 +13,7 @@ Thank you for your interest in contributing to Evaldeck!
 
 ```bash
 # Clone the repo
-git clone https://github.com/evaldeck-ai/evaldeck.git
+git clone https://github.com/tantra-run/evaldeck-py.git
 cd evaldeck
 
 # Create virtual environment
@@ -51,6 +51,6 @@ pytest
 
 ## Getting Help
 
-- **Questions**: [GitHub Discussions](https://github.com/evaldeck-ai/evaldeck/discussions)
-- **Bugs**: [GitHub Issues](https://github.com/evaldeck-ai/evaldeck/issues)
+- **Questions**: [GitHub Discussions](https://github.com/tantra-run/evaldeck-py/discussions)
+- **Bugs**: [GitHub Issues](https://github.com/tantra-run/evaldeck-py/issues)
 - **Chat**: Discord (coming soon)

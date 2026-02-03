@@ -1,8 +1,8 @@
 site_name: Evaldeck
 site_description: The evaluation framework for AI agents. Pytest for agents.
-site_url: https://evaldeck.dev
-repo_url: https://github.com/evaldeck-ai/evaldeck
-repo_name: evaldeck-ai/evaldeck
+site_url: https://tantra-run.github.io/evaldeck-py/
+repo_url: https://github.com/tantra-run/evaldeck-py
+repo_name: tantra-run/evaldeck-py
 edit_uri: edit/main/docs/
 
 not_in_nav: |
@@ -54,14 +54,14 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/evaldeck-ai/evaldeck
+      link: https://github.com/tantra-run/evaldeck-py
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/evaldeck/
   generator: false
   version:
     provider: mike
 
-copyright: Copyright &copy; 2024 Evaldeck Contributors
+copyright: Copyright &copy; 2024 Tantra Run Team
 
 markdown_extensions:
   - abbr
@@ -91,8 +91,8 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: evaldeck-ai
-      repo: evaldeck
+      user: tantra-run
+      repo: evaldeck-py
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.snippets:
