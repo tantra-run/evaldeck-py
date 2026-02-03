@@ -51,6 +51,8 @@ dev = [
     "ruff>=0.1",
     "mypy>=1.0",
     "pre-commit>=3.0",
+    "build>=1.0",
+    "twine>=5.0",
 ]
 docs = [
     "mkdocs>=1.5",
