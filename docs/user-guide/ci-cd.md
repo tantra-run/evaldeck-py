@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[all]"
+          pip install evaldeck[all]
 
       - name: Run evaluations
         env:
@@ -67,7 +67,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -e ".[all]"
+        run: pip install evaldeck[all]
 
       - name: Run evaluations
         env:
@@ -106,7 +106,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -e ".[all]"
+      - run: pip install evaldeck[all]
       - name: Run smoke tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -122,7 +122,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -e ".[all]"
+      - run: pip install evaldeck[all]
       - name: Run full regression
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -147,7 +147,7 @@ evaluate:
   stage: evaluate
   image: python:3.11
   script:
-    - pip install -e ".[all]"
+    - pip install evaldeck[all]
     - evaldeck run --output junit --output-file results.xml
   artifacts:
     when: always
@@ -172,7 +172,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip install -e ".[all]"
+          command: pip install evaldeck[all]
       - run:
           name: Run evaluations
           command: evaldeck run --output junit --output-file results.xml
@@ -205,7 +205,7 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                sh 'pip install -e ".[all]"'
+                sh 'pip install evaldeck[all]'
             }
         }
 
