@@ -1,0 +1,192 @@
+site_name: Evaldeck
+site_description: The evaluation framework for AI agents. Pytest for agents.
+site_url: https://evaldeck.dev
+repo_url: https://github.com/evaldeck-ai/evaldeck
+repo_name: evaldeck-ai/evaldeck
+edit_uri: edit/main/docs/
+
+not_in_nav: |
+  includes/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/test-tube
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/evaldeck-ai/evaldeck
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/evaldeck/
+  generator: false
+  version:
+    provider: mike
+
+copyright: Copyright &copy; 2024 Evaldeck Contributors
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: evaldeck-ai
+      repo: evaldeck
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            signature_crossrefs: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Your First Evaluation: getting-started/first-evaluation.md
+  - User Guide:
+      - user-guide/index.md
+      - Configuration: user-guide/configuration.md
+      - Test Cases: user-guide/test-cases.md
+      - CLI Reference: user-guide/cli.md
+      - Graders:
+          - user-guide/graders/index.md
+          - Code-Based Graders: user-guide/graders/code-based.md
+          - LLM Graders: user-guide/graders/llm-based.md
+          - Custom Graders: user-guide/graders/custom.md
+      - Metrics: user-guide/metrics.md
+      - Framework Integrations:
+          - user-guide/integrations/index.md
+          - OpenTelemetry: user-guide/integrations/opentelemetry.md
+          - Manual Traces: user-guide/integrations/manual.md
+      - CI/CD Integration: user-guide/ci-cd.md
+  - Concepts:
+      - concepts/index.md
+      - Architecture Overview: concepts/architecture.md
+      - Traces & Steps: concepts/traces.md
+      - Evaluation Workflow: concepts/evaluation-workflow.md
+      - Grading Strategies: concepts/grading-strategies.md
+  - API Reference:
+      - api/index.md
+      - Core:
+          - Trace: api/trace.md
+          - Step: api/step.md
+          - Evaluator: api/evaluator.md
+          - EvalCase: api/evalcase.md
+      - Results:
+          - GradeResult: api/grade-result.md
+          - EvaluationResult: api/evaluation-result.md
+      - Graders:
+          - BaseGrader: api/graders/base.md
+          - Code Graders: api/graders/code.md
+          - LLM Graders: api/graders/llm.md
+      - Metrics: api/metrics.md
+      - Configuration: api/config.md
+  - Examples:
+      - examples/index.md
+      - Basic Usage: examples/basic-usage.md
+      - Testing Tool Calls: examples/tool-calls.md
+      - LLM-as-Judge: examples/llm-judge.md
+      - LangChain Agent: examples/langchain-agent.md
+  - Contributing:
+      - contributing/index.md
+      - Development Setup: contributing/setup.md
+      - Code Standards: contributing/code-standards.md
+      - Adding Graders: contributing/adding-graders.md
+      - Adding Metrics: contributing/adding-metrics.md
+      - Adding Integrations: contributing/adding-integrations.md
+
+extra_css:
+  - stylesheets/extra.css

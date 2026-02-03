@@ -1,0 +1,106 @@
+/* Custom styles for Evaldeck documentation */
+
+:root {
+  --md-primary-fg-color: #673ab7;
+  --md-primary-fg-color--light: #9575cd;
+  --md-primary-fg-color--dark: #512da8;
+  --md-accent-fg-color: #ffc107;
+}
+
+/* Subtitle styling */
+.subtitle {
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--md-default-fg-color--light);
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Code block improvements */
+.highlight code {
+  font-size: 0.85rem;
+}
+
+/* Admonition customization */
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .admonition.tip>.admonition-title,
+.md-typeset details.tip>summary {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+/* API reference styling */
+.doc-object {
+  margin-bottom: 2rem;
+}
+
+.doc-signature {
+  background-color: var(--md-code-bg-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-family: var(--md-code-font-family);
+}
+
+/* Navigation improvements */
+.md-nav__link--active {
+  font-weight: 600;
+}
+
+/* Table styling */
+.md-typeset table:not([class]) {
+  font-size: 0.85rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-default-fg-color--lightest);
+}
+
+/* Card grid for home page */
+.grid.cards>ul>li {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.grid.cards>ul>li:hover {
+  border-color: var(--md-primary-fg-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Terminal output styling */
+.terminal-output {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-family: var(--md-code-font-family);
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.terminal-output .success {
+  color: #4ec9b0;
+}
+
+.terminal-output .failure {
+  color: #f14c4c;
+}
+
+.terminal-output .info {
+  color: #569cd6;
+}
+
+/* Version badge */
+.version-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--md-primary-fg-color);
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
