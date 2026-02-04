@@ -22,13 +22,18 @@ logger = logging.getLogger("evaldeck")
 
 def setup_logging(verbose: bool) -> None:
     """Configure logging with rich handler."""
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(message)s",
-        handlers=[RichHandler(console=console, show_time=False, show_path=False)],
-    )
-    logger.setLevel(level)
+    # Only configure evaldeck logger, not root (to avoid noise from other libraries)
+    handler = RichHandler(console=console, show_time=False, show_path=False)
+    handler.setFormatter(logging.Formatter("%(message)s"))
+
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+
+    # Suppress noisy loggers
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("anthropic").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
 @click.group()
