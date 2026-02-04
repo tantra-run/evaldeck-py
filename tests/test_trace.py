@@ -1,6 +1,5 @@
 """Tests for trace module."""
 
-
 from evaldeck import Step, StepType, Trace, TraceStatus
 
 

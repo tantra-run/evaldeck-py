@@ -176,7 +176,11 @@ REASON: Your explanation
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.content[0].text  # type: ignore[no-any-return]
+        # Extract text from first TextBlock
+        for block in response.content:
+            if hasattr(block, "text"):
+                return block.text
+        return ""
 
     async def _call_anthropic_async(self, prompt: str) -> str:
         """Call Anthropic API (async)."""
@@ -193,7 +197,11 @@ REASON: Your explanation
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.content[0].text  # type: ignore[no-any-return]
+        # Extract text from first TextBlock
+        for block in response.content:
+            if hasattr(block, "text"):
+                return block.text
+        return ""
 
     def _parse_response(self, response: str) -> tuple[GradeStatus, str, float | None]:
         """Parse LLM response to extract verdict.

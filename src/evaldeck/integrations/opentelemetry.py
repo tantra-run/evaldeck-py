@@ -65,7 +65,7 @@ SPAN_KIND_GUARDRAIL = "GUARDRAIL"
 SPAN_KIND_AGENT = "AGENT"
 
 
-class EvaldeckSpanProcessor(SpanProcessor):  # type: ignore[misc]
+class EvaldeckSpanProcessor(SpanProcessor):
     """OpenTelemetry SpanProcessor that builds Evaldeck Traces from OpenInference spans.
 
     This processor intercepts OpenTelemetry spans as they complete and converts them
