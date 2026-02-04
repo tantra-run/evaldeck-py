@@ -49,6 +49,8 @@ That's it. Evaldeck handles OTel instrumentation automatically.
 pip install "evaldeck[langchain]"
 ```
 
+**Note on parallel execution:** Agent invocations are serialized (one at a time) to ensure clean trace capture. Grading still runs in parallel. This is a limitation of OpenTelemetry's global tracer - concurrent agent runs would mix traces.
+
 ### 2. OpenTelemetry/OpenInference (Manual Setup)
 
 For frameworks without built-in support, use the OTel adapter directly:

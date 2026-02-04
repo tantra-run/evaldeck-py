@@ -95,6 +95,8 @@ Evaldeck handles OTel instrumentation and trace capture automatically.
 |-----------|-------|---------|
 | LangChain / LangGraph | `langchain` | `pip install evaldeck[langchain]` |
 
+**Note:** Agent invocations are serialized to ensure clean trace capture. Grading runs in parallel.
+
 ### Without Framework Integration
 
 If not using a supported framework, your function must return a `Trace`:
