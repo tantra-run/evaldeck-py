@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
 import click
 from rich import box
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.panel import Panel
 from rich.table import Table
 
@@ -15,6 +17,18 @@ from evaldeck.config import EvaldeckConfig, generate_default_config, generate_ex
 from evaldeck.results import EvaluationResult, GradeStatus, RunResult
 
 console = Console()
+logger = logging.getLogger("evaldeck")
+
+
+def setup_logging(verbose: bool) -> None:
+    """Configure logging with rich handler."""
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(message)s",
+        handlers=[RichHandler(console=console, show_time=False, show_path=False)],
+    )
+    logger.setLevel(level)
 
 
 @click.group()
@@ -93,11 +107,14 @@ def run(
     workers: int | None,
 ) -> None:
     """Run evaluations."""
+    setup_logging(verbose)
+
     try:
         # Load config
         cfg = EvaldeckConfig.load(config)
+        logger.debug(f"Loaded config: test_dir={cfg.test_dir}, agent={cfg.agent.module}")
     except FileNotFoundError:
-        console.print("[red]No evaldeck.yaml found. Run 'evaldeck init' first.[/red]")
+        logger.error("No evaldeck.yaml found. Run 'evaldeck init' first.")
         sys.exit(1)
 
     console.print("[bold]Evaldeck[/bold] - Running evaluations...\n")
@@ -130,8 +147,8 @@ def run(
 
     # Check if agent is configured
     if not cfg.agent.module or not cfg.agent.function:
-        console.print("[yellow]No agent configured in evaldeck.yaml[/yellow]")
-        console.print("Running in dry-run mode (no agent execution)\n")
+        logger.warning("No agent configured in evaldeck.yaml")
+        logger.info("Running in dry-run mode (no agent execution)\n")
 
         # Show what would be run
         for s in suites:
@@ -139,6 +156,10 @@ def run(
             for tc in s.test_cases:
                 console.print(f"  - {tc.name}")
         sys.exit(0)
+
+    logger.debug(f"Agent: {cfg.agent.module}.{cfg.agent.function}")
+    if cfg.agent.framework:
+        logger.debug(f"Framework: {cfg.agent.framework}")
 
     # Run evaluations
     def on_result(result: EvaluationResult) -> None:
@@ -153,9 +174,20 @@ def run(
         duration = f"({result.duration_ms:.1f}ms)" if result.duration_ms else ""
         console.print(f"  {icon} {result.test_case_name} {duration}")
 
-        if verbose and not result.passed:
-            for grade in result.failed_grades:
-                console.print(f"      [dim]└─ {grade.grader_name}: {grade.message}[/dim]")
+        if verbose:
+            # Show all grades in verbose mode
+            for grade in result.grades:
+                if grade.passed:
+                    grade_icon = "[green]✓[/green]"
+                else:
+                    grade_icon = "[red]✗[/red]"
+                msg = grade.message or grade.status.value
+                console.print(f"      [dim]{grade_icon} {grade.grader_name}: {msg}[/dim]")
+
+                # Show extra details for LLM graders
+                if grade.details and "raw_response" in grade.details:
+                    response_preview = grade.details["raw_response"][:150].replace("\n", " ")
+                    logger.debug(f"        LLM response: {response_preview}...")
 
     # Show concurrency info
     effective_workers = workers if workers is not None else cfg.execution.workers
@@ -174,14 +206,12 @@ def run(
             max_concurrent=workers,
         )
     except ValueError as e:
-        console.print(f"[red]Error: {e}[/red]")
+        logger.error(f"Error: {e}")
         sys.exit(1)
     except Exception as e:
-        console.print(f"[red]Evaluation error: {e}[/red]")
+        logger.error(f"Evaluation error: {e}")
         if verbose:
-            import traceback
-
-            console.print(traceback.format_exc())
+            logger.exception("Full traceback:")
         sys.exit(1)
 
     # Print summary
