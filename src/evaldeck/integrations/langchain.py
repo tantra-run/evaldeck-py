@@ -41,7 +41,9 @@ class LangChainIntegration:
 
         # Import here to make langchain an optional dependency
         try:
-            from openinference.instrumentation.langchain import LangChainInstrumentor
+            from openinference.instrumentation.langchain import (
+                LangChainInstrumentor,  # type: ignore[import-untyped]
+            )
         except ImportError as e:
             raise ImportError(
                 "LangChain integration requires openinference-instrumentation-langchain. "

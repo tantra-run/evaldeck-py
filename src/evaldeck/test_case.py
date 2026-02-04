@@ -109,7 +109,8 @@ class EvalCase(BaseModel):
 
     def to_yaml(self) -> str:
         """Convert test case to YAML string."""
-        return yaml.dump(self.model_dump(exclude_none=True), default_flow_style=False)
+        result: str = yaml.dump(self.model_dump(exclude_none=True), default_flow_style=False)
+        return result
 
 
 class EvalSuite(BaseModel):

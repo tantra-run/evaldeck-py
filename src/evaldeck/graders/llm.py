@@ -130,7 +130,7 @@ REASON: Your explanation
     def _call_openai(self, prompt: str) -> str:
         """Call OpenAI API (sync)."""
         try:
-            from openai import OpenAI
+            from openai import OpenAI  # type: ignore[import-not-found]
         except ImportError:
             raise ImportError(
                 "OpenAI package not installed. Run: pip install evaldeck[openai]"
@@ -147,7 +147,7 @@ REASON: Your explanation
     async def _call_openai_async(self, prompt: str) -> str:
         """Call OpenAI API (async)."""
         try:
-            from openai import AsyncOpenAI
+            from openai import AsyncOpenAI  # type: ignore[import-not-found]
         except ImportError:
             raise ImportError(
                 "OpenAI package not installed. Run: pip install evaldeck[openai]"
@@ -164,7 +164,7 @@ REASON: Your explanation
     def _call_anthropic(self, prompt: str) -> str:
         """Call Anthropic API (sync)."""
         try:
-            from anthropic import Anthropic
+            from anthropic import Anthropic  # type: ignore[import-not-found]
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"
@@ -181,7 +181,7 @@ REASON: Your explanation
     async def _call_anthropic_async(self, prompt: str) -> str:
         """Call Anthropic API (async)."""
         try:
-            from anthropic import AsyncAnthropic
+            from anthropic import AsyncAnthropic  # type: ignore[import-not-found]
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"

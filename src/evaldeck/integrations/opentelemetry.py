@@ -139,9 +139,12 @@ class EvaldeckSpanProcessor(SpanProcessor):  # type: ignore[misc]
         trace.input = str(attrs.get("input.value", trace.input or ""))
         trace.output = attrs.get("output.value")
         trace.status = self._map_trace_status(span)
-        trace.started_at = self._ns_to_datetime(span.start_time)
-        trace.completed_at = self._ns_to_datetime(span.end_time)
-        trace.duration_ms = (span.end_time - span.start_time) / 1_000_000
+        if span.start_time is not None:
+            trace.started_at = self._ns_to_datetime(span.start_time)
+        if span.end_time is not None:
+            trace.completed_at = self._ns_to_datetime(span.end_time)
+        if span.start_time is not None and span.end_time is not None:
+            trace.duration_ms = (span.end_time - span.start_time) / 1_000_000
 
         # Extract agent/framework info
         if "llm.system" in attrs:
@@ -314,12 +317,16 @@ class EvaldeckSpanProcessor(SpanProcessor):  # type: ignore[misc]
     def _extract_error(self, span: ReadableSpan) -> str | None:
         """Extract error message from span if present."""
         if span.status.status_code == StatusCode.ERROR:
-            return span.status.description  # type: ignore[no-any-return]
+            desc: str | None = span.status.description
+            return desc
         return None
 
     def _calc_duration_ms(self, span: ReadableSpan) -> float:
         """Calculate span duration in milliseconds."""
-        return (span.end_time - span.start_time) / 1_000_000  # type: ignore[no-any-return]
+        if span.start_time is None or span.end_time is None:
+            return 0.0
+        duration: float = (span.end_time - span.start_time) / 1_000_000
+        return duration
 
     def _ns_to_datetime(self, ns: int) -> datetime:
         """Convert nanoseconds timestamp to datetime."""
