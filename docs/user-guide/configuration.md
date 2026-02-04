@@ -64,20 +64,46 @@ output_dir: .evaldeck       # Directory for results and artifacts
 
 ## Agent Configuration
 
-### Module and Function
+### With Framework Integration (Recommended)
 
-The agent configuration tells Evaldeck how to run your agent:
+For supported frameworks, use the `framework` option for automatic instrumentation:
+
+```yaml
+agent:
+  module: my_agent
+  function: create_agent
+  framework: langchain
+```
+
+Your function returns the agent instance (not a Trace):
+
+```python
+# my_agent.py
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+def create_agent():
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    return create_react_agent(llm, tools=[...])
+```
+
+Evaldeck handles OTel instrumentation and trace capture automatically.
+
+**Supported frameworks:**
+
+| Framework | Value | Install |
+|-----------|-------|---------|
+| LangChain / LangGraph | `langchain` | `pip install evaldeck[langchain]` |
+
+### Without Framework Integration
+
+If not using a supported framework, your function must return a `Trace`:
 
 ```yaml
 agent:
   module: my_package.agents.booking
   function: run_booking_agent
 ```
-
-Your function must:
-
-1. Accept a string input
-2. Return a `Trace` object
 
 ```python
 # my_package/agents/booking.py

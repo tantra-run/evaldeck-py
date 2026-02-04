@@ -23,29 +23,53 @@ your-project/
 
 ## Configure Your Agent
 
-Edit `evaldeck.yaml` to point to your agent:
+### LangChain / LangGraph (Recommended)
+
+For LangChain agents, use the built-in integration:
 
 ```yaml title="evaldeck.yaml"
 version: 1
 
 agent:
-  module: my_agent          # Python module name
-  function: run_agent       # Function to call
+  module: my_agent
+  function: create_agent
+  framework: langchain      # Auto-instruments LangChain
 
 test_dir: tests/evals
-
-defaults:
-  timeout: 30
-  retries: 0
 ```
 
-Your agent function should accept a string input and return a `Trace` object:
+Your function returns the agent (evaldeck handles tracing):
+
+```python title="my_agent.py"
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+def create_agent():
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    tools = [...]  # Your tools
+    return create_react_agent(llm, tools)
+```
+
+Install with: `pip install evaldeck[langchain]`
+
+### Other Frameworks
+
+For other frameworks, your function returns a `Trace`:
+
+```yaml title="evaldeck.yaml"
+version: 1
+
+agent:
+  module: my_agent
+  function: run_agent
+
+test_dir: tests/evals
+```
 
 ```python title="my_agent.py"
 from evaldeck import Trace, Step
 
 def run_agent(input: str) -> Trace:
-    """Your agent implementation."""
     trace = Trace(input=input)
 
     # Agent logic here...

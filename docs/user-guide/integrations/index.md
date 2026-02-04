@@ -6,7 +6,7 @@ Evaldeck works with any agent framework by capturing execution as a `Trace`. Thi
 
 | Framework | Integration Method | Status |
 |-----------|-------------------|--------|
-| LangChain / LangGraph | OpenTelemetry | Available |
+| LangChain / LangGraph | Built-in | Available |
 | CrewAI | OpenTelemetry | Available |
 | LiteLLM | OpenTelemetry | Available |
 | OpenAI SDK | OpenTelemetry | Available |
@@ -16,33 +16,63 @@ Evaldeck works with any agent framework by capturing execution as a `Trace`. Thi
 
 ## Integration Approaches
 
-### 1. OpenTelemetry/OpenInference (Recommended)
+### 1. Built-in Framework Integration (Recommended)
 
-The OpenTelemetry adapter provides **broad framework coverage with a single integration**. It works with any framework that has an [OpenInference instrumentor](https://github.com/Arize-ai/openinference).
+For supported frameworks, just set `framework` in your config:
+
+```yaml
+# evaldeck.yaml
+agent:
+  module: my_agent
+  function: create_agent
+  framework: langchain
+```
 
 ```python
-from openinference.instrumentation.langchain import LangChainInstrumentor
-# or: from openinference.instrumentation.crewai import CrewAIInstrumentor
-# or: from openinference.instrumentation.openai import OpenAIInstrumentor
+# my_agent.py
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
+def create_agent():
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    return create_react_agent(llm, tools=[...])
+```
+
+```bash
+evaldeck run
+```
+
+That's it. Evaldeck handles OTel instrumentation automatically.
+
+**Install:**
+```bash
+pip install "evaldeck[langchain]"
+```
+
+### 2. OpenTelemetry/OpenInference (Manual Setup)
+
+For frameworks without built-in support, use the OTel adapter directly:
+
+```python
+from openinference.instrumentation.crewai import CrewAIInstrumentor
 from evaldeck.integrations import setup_otel_tracing
 
 # Setup once
 processor = setup_otel_tracing()
-LangChainInstrumentor().instrument()
+CrewAIInstrumentor().instrument()
 
-# Run your agent (standard code, no changes needed)
-result = agent.invoke({"input": "Book a flight"})
+# Run your agent
+result = agent.run("Book a flight")
 
 # Get trace and evaluate
-evaldeck_trace = processor.get_latest_trace()
-result = evaluator.evaluate(evaldeck_trace, test_case)
+trace = processor.get_latest_trace()
+result = evaluator.evaluate(trace, test_case)
 ```
 
 **Install:**
 ```bash
 pip install evaldeck
-pip install openinference-instrumentation-langchain  # or your framework
+pip install openinference-instrumentation-crewai  # or your framework
 ```
 
 [OpenTelemetry Integration →](opentelemetry.md)
