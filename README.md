@@ -2,9 +2,13 @@
 
 **The evaluation framework for AI agents. Pytest for agents.**
 
-[![PyPI version](https://badge.fury.io/py/evaldeck.svg)](https://badge.fury.io/py/evaldeck)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PyPI version](https://img.shields.io/pypi/v/evaldeck.svg)](https://pypi.org/project/evaldeck/)
+[![CI](https://github.com/tantra-run/evaldeck-py/actions/workflows/ci.yaml/badge.svg)](https://github.com/tantra-run/evaldeck-py/actions/workflows/ci.yaml)
+[![Downloads](https://img.shields.io/pypi/dm/evaldeck.svg)](https://pypi.org/project/evaldeck/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Type checked](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](https://mypy-lang.org/)
 
 ---
 
