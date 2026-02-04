@@ -571,4 +571,17 @@ class EvaluationRunner:
 
         module = importlib.import_module(agent_config.module)
         func = getattr(module, agent_config.function)
+
+        # Handle framework-specific integration
+        if agent_config.framework:
+            framework = agent_config.framework.lower()
+
+            if framework == "langchain":
+                from evaldeck.integrations.langchain import create_langchain_runner
+
+                return create_langchain_runner(func)
+
+            else:
+                raise ValueError(f"Unknown framework: {agent_config.framework}")
+
         return func

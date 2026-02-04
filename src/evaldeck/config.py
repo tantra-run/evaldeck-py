@@ -15,6 +15,7 @@ class AgentConfig(BaseModel):
     module: str | None = None
     function: str | None = None
     class_name: str | None = None
+    framework: str | None = None  # "langchain", "crewai", etc.
 
 
 class GraderDefaults(BaseModel):

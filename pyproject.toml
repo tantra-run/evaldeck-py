@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "evaldeck"
-version = "0.1.1"
+version = "0.1.2"
 description = "The evaluation framework for AI agents. Pytest for agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -43,7 +43,8 @@ dependencies = [
 [project.optional-dependencies]
 openai = ["openai>=1.0"]
 anthropic = ["anthropic>=0.18"]
-all = ["evaldeck[openai,anthropic]"]
+langchain = ["openinference-instrumentation-langchain>=0.1"]
+all = ["evaldeck[openai,anthropic,langchain]"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",

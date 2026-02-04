@@ -3,7 +3,7 @@
 This module provides the OpenTelemetry/OpenInference adapter for capturing traces
 from any instrumented AI framework (LangChain, CrewAI, LiteLLM, OpenAI, Anthropic, etc.)
 
-Usage:
+Basic usage (manual setup):
     from evaldeck.integrations import EvaldeckSpanProcessor, setup_otel_tracing
     from openinference.instrumentation.langchain import LangChainInstrumentor
 
@@ -14,6 +14,19 @@ Usage:
 
     trace = processor.get_latest_trace()
     result = evaluator.evaluate(trace, test_case)
+
+With framework integration (automatic setup via evaldeck.yaml):
+    # evaldeck.yaml
+    agent:
+      module: my_agent
+      function: create_agent
+      framework: langchain
+
+    # my_agent.py
+    def create_agent():
+        return create_react_agent(llm, tools)
+
+    # Run: evaldeck run
 """
 
 from evaldeck.integrations.opentelemetry import (
