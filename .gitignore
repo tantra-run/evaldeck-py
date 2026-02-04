@@ -91,4 +91,5 @@ Thumbs.db
 
 # Internal
 internal/
-.cladue/site/
+.claude/
+site/
