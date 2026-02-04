@@ -165,6 +165,7 @@ REASON: Your explanation
         """Call Anthropic API (sync)."""
         try:
             from anthropic import Anthropic
+            from anthropic.types import TextBlock
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"
@@ -178,7 +179,7 @@ REASON: Your explanation
         )
         # Extract text from first TextBlock
         for block in response.content:
-            if hasattr(block, "text"):
+            if isinstance(block, TextBlock):
                 return block.text
         return ""
 
@@ -186,6 +187,7 @@ REASON: Your explanation
         """Call Anthropic API (async)."""
         try:
             from anthropic import AsyncAnthropic
+            from anthropic.types import TextBlock
         except ImportError:
             raise ImportError(
                 "Anthropic package not installed. Run: pip install evaldeck[anthropic]"
@@ -199,7 +201,7 @@ REASON: Your explanation
         )
         # Extract text from first TextBlock
         for block in response.content:
-            if hasattr(block, "text"):
+            if isinstance(block, TextBlock):
                 return block.text
         return ""
 
