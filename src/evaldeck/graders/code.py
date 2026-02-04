@@ -508,7 +508,7 @@ class CustomGrader(BaseGrader):
         self.func = func
         self.module_name = module
         self.function_name = function
-        self._loaded_func: Callable | None = None
+        self._loaded_func: Callable[..., GradeResult] | None = None
 
     def _get_func(self) -> Callable[[Trace, EvalCase], GradeResult]:
         """Get the grading function."""
@@ -550,7 +550,7 @@ class CustomGrader(BaseGrader):
         try:
             func = self._get_func()
             if asyncio.iscoroutinefunction(func):
-                return await func(trace, test_case)
+                return await func(trace, test_case)  # type: ignore[no-any-return]
             else:
                 return await asyncio.to_thread(func, trace, test_case)
         except Exception as e:

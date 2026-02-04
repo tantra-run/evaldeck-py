@@ -6,7 +6,8 @@ Provides automatic instrumentation and trace capture for LangChain/LangGraph age
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from evaldeck.trace import Trace
@@ -92,7 +93,7 @@ class LangChainIntegration:
 
             # Get the trace
             trace_id = new_trace_ids.pop()
-            trace = self._processor.get_trace(trace_id)
+            trace: Trace | None = self._processor.get_trace(trace_id)
 
             if trace is None:
                 raise RuntimeError("No trace captured from agent execution")

@@ -65,7 +65,7 @@ SPAN_KIND_GUARDRAIL = "GUARDRAIL"
 SPAN_KIND_AGENT = "AGENT"
 
 
-class EvaldeckSpanProcessor(SpanProcessor):
+class EvaldeckSpanProcessor(SpanProcessor):  # type: ignore[misc]
     """OpenTelemetry SpanProcessor that builds Evaldeck Traces from OpenInference spans.
 
     This processor intercepts OpenTelemetry spans as they complete and converts them
@@ -150,9 +150,7 @@ class EvaldeckSpanProcessor(SpanProcessor):
         trace.metadata["otel_trace_id"] = format(span.context.trace_id, "032x")
         trace.metadata["otel_root_span_id"] = format(span.context.span_id, "016x")
 
-    def _span_to_step(
-        self, span: ReadableSpan, kind: str, attrs: dict[str, Any]
-    ) -> Step | None:
+    def _span_to_step(self, span: ReadableSpan, kind: str, attrs: dict[str, Any]) -> Step | None:
         """Convert an OpenTelemetry span to an Evaldeck Step."""
 
         if kind == SPAN_KIND_LLM:
@@ -196,11 +194,7 @@ class EvaldeckSpanProcessor(SpanProcessor):
 
     def _convert_tool_span(self, span: ReadableSpan, attrs: dict[str, Any]) -> Step:
         """Convert a TOOL span to a Step."""
-        tool_name = (
-            attrs.get("tool.name")
-            or attrs.get("tool_call.function.name")
-            or "unknown_tool"
-        )
+        tool_name = attrs.get("tool.name") or attrs.get("tool_call.function.name") or "unknown_tool"
 
         tool_args = self._parse_json(
             attrs.get("tool.parameters")
@@ -222,9 +216,7 @@ class EvaldeckSpanProcessor(SpanProcessor):
             },
         )
 
-    def _convert_retrieval_span(
-        self, span: ReadableSpan, kind: str, attrs: dict[str, Any]
-    ) -> Step:
+    def _convert_retrieval_span(self, span: ReadableSpan, kind: str, attrs: dict[str, Any]) -> Step:
         """Convert EMBEDDING/RETRIEVER/RERANKER spans to tool call Steps."""
         return Step(
             type=StepType.TOOL_CALL,
@@ -322,12 +314,12 @@ class EvaldeckSpanProcessor(SpanProcessor):
     def _extract_error(self, span: ReadableSpan) -> str | None:
         """Extract error message from span if present."""
         if span.status.status_code == StatusCode.ERROR:
-            return span.status.description
+            return span.status.description  # type: ignore[no-any-return]
         return None
 
     def _calc_duration_ms(self, span: ReadableSpan) -> float:
         """Calculate span duration in milliseconds."""
-        return (span.end_time - span.start_time) / 1_000_000
+        return (span.end_time - span.start_time) / 1_000_000  # type: ignore[no-any-return]
 
     def _ns_to_datetime(self, ns: int) -> datetime:
         """Convert nanoseconds timestamp to datetime."""

@@ -113,7 +113,7 @@ class CompositeGrader(BaseGrader):
         # Handle any exceptions
         grade_results: list[GradeResult] = []
         for i, result in enumerate(results):
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 grade_results.append(
                     GradeResult.error_result(self.graders[i].name, f"Grader error: {result}")
                 )

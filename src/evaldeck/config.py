@@ -69,10 +69,12 @@ class EvaldeckConfig(BaseModel):
     execution: ExecutionConfig = Field(default_factory=ExecutionConfig)
 
     # Legacy execution defaults (deprecated, use execution instead)
-    defaults: dict[str, Any] = Field(default_factory=lambda: {
-        "timeout": 30,
-        "retries": 0,
-    })
+    defaults: dict[str, Any] = Field(
+        default_factory=lambda: {
+            "timeout": 30,
+            "retries": 0,
+        }
+    )
 
     # Grader configuration
     graders: GraderDefaults = Field(default_factory=GraderDefaults)

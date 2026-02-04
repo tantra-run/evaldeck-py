@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -32,6 +32,7 @@ from evaldeck.results import (
     EvaluationResult,
     GradeResult,
     GradeStatus,
+    MetricResult,
     RunResult,
     SuiteResult,
 )
@@ -266,7 +267,7 @@ class Evaluator:
         )
 
         # Run graders concurrently
-        async def run_grader(grader):
+        async def run_grader(grader: BaseGrader) -> GradeResult:
             try:
                 return await grader.grade_async(trace, test_case)
             except Exception as e:
@@ -278,7 +279,7 @@ class Evaluator:
             result.add_grade(grade)
 
         # Calculate metrics concurrently (supports async custom metrics)
-        async def run_metric(metric):
+        async def run_metric(metric: BaseMetric) -> MetricResult | None:
             try:
                 return await metric.calculate_async(trace, test_case)
             except Exception:
@@ -348,7 +349,7 @@ class Evaluator:
         semaphore = asyncio.Semaphore(max_concurrent) if max_concurrent > 0 else None
 
         @asynccontextmanager
-        async def maybe_semaphore():
+        async def maybe_semaphore() -> AsyncIterator[None]:
             """Context manager that optionally acquires semaphore."""
             if semaphore:
                 async with semaphore:
@@ -371,11 +372,11 @@ class Evaluator:
         # Add results in original order
         results_by_index: dict[int, EvaluationResult] = {}
         for item in results:
-            if isinstance(item, Exception):
+            if isinstance(item, BaseException):
                 # This shouldn't happen since _evaluate_single_async catches exceptions
                 continue
-            index, result = item
-            results_by_index[index] = result
+            idx, res = item
+            results_by_index[idx] = res
 
         for i in range(len(suite.test_cases)):
             if i in results_by_index:
@@ -414,7 +415,7 @@ class Evaluator:
                 trace = await agent_func(test_case.input)  # type: ignore
             else:
                 # Run sync function in thread pool to not block event loop
-                trace = await asyncio.to_thread(agent_func, test_case.input)  # type: ignore
+                trace = await asyncio.to_thread(agent_func, test_case.input)
 
             # Use async evaluate to run graders concurrently
             return await self.evaluate_async(trace, test_case)
@@ -584,4 +585,4 @@ class EvaluationRunner:
             else:
                 raise ValueError(f"Unknown framework: {agent_config.framework}")
 
-        return func
+        return func  # type: ignore[no-any-return]
