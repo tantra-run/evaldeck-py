@@ -5,6 +5,7 @@ Provides automatic instrumentation and trace capture for LangChain/LangGraph age
 
 from __future__ import annotations
 
+import threading
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
@@ -16,12 +17,17 @@ class LangChainIntegration:
 
     Automatically sets up OpenTelemetry tracing and provides a wrapper
     that invokes the agent and returns a Trace.
+
+    Thread-safe: uses thread-local storage to track traces per thread,
+    allowing parallel test execution.
     """
 
     def __init__(self) -> None:
         self._processor: Any = None
         self._agent: Any = None
         self._initialized = False
+        self._lock = threading.Lock()
+        self._local = threading.local()
 
     def setup(self, agent_factory: Callable[[], Any]) -> None:
         """Set up instrumentation and create the agent.
@@ -46,7 +52,7 @@ class LangChainIntegration:
         # Set up OTel tracing
         self._processor = setup_otel_tracing()
 
-        # Instrument LangChain
+        # Instrument LangChain (only once)
         LangChainInstrumentor().instrument()
 
         # Create the agent
@@ -55,6 +61,9 @@ class LangChainIntegration:
 
     def run(self, input: str) -> Trace:
         """Run the agent and return a trace.
+
+        Note: Agent invocations are serialized (one at a time) to ensure
+        clean trace capture. Evaluations (grading) can still run in parallel.
 
         Args:
             input: The input string to send to the agent.
@@ -65,18 +74,30 @@ class LangChainIntegration:
         if not self._initialized:
             raise RuntimeError("Integration not initialized. Call setup() first.")
 
-        # Reset processor for fresh trace
-        self._processor.reset()
+        # Serialize agent invocations to ensure clean trace capture
+        # (OTel trace IDs can get mixed when agents run truly in parallel)
+        with self._lock:
+            # Record traces before
+            traces_before = set(self._processor._traces.keys())
 
-        # Invoke the agent - auto-detect format
-        self._invoke_agent(input)
+            # Invoke the agent
+            self._invoke_agent(input)
 
-        # Get and return trace
-        trace = self._processor.get_latest_trace()
-        if trace is None:
-            raise RuntimeError("No trace captured from agent execution")
+            # Find the new trace created by this invocation
+            traces_after = set(self._processor._traces.keys())
+            new_trace_ids = traces_after - traces_before
 
-        return trace
+            if not new_trace_ids:
+                raise RuntimeError("No trace captured from agent execution")
+
+            # Get the trace
+            trace_id = new_trace_ids.pop()
+            trace = self._processor.get_trace(trace_id)
+
+            if trace is None:
+                raise RuntimeError("No trace captured from agent execution")
+
+            return trace
 
     def _invoke_agent(self, input: str) -> Any:
         """Invoke the agent with the appropriate format.
