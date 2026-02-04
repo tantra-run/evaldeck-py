@@ -2,7 +2,7 @@
 
 import pytest
 
-from evaldeck import EvalCase, ExpectedBehavior, Step, Trace
+from evaldeck import EvalCase, ExpectedBehavior, Step, Trace, Turn
 
 
 @pytest.fixture
@@ -34,12 +34,16 @@ def simple_test_case() -> EvalCase:
     """A simple test case for testing."""
     return EvalCase(
         name="book_flight_basic",
-        input="Book a flight from NYC to LA",
-        expected=ExpectedBehavior(
-            tools_called=["search_flights", "book_flight"],
-            output_contains=["booked", "confirmation"],
-            max_steps=5,
-        ),
+        turns=[
+            Turn(
+                user="Book a flight from NYC to LA",
+                expected=ExpectedBehavior(
+                    tools_called=["search_flights", "book_flight"],
+                    output_contains=["booked", "confirmation"],
+                    max_steps=5,
+                ),
+            )
+        ],
     )
 
 

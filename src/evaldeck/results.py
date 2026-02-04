@@ -77,6 +77,28 @@ class MetricResult(BaseModel):
     details: dict[str, Any] = Field(default_factory=dict)
 
 
+class TurnResult(BaseModel):
+    """Result of evaluating a single turn in a conversation."""
+
+    turn_index: int
+    user_input: str
+    status: GradeStatus
+    grades: list[GradeResult] = Field(default_factory=list)
+    trace_id: str | None = None
+    duration_ms: float | None = None
+    skipped: bool = False
+
+    @property
+    def passed(self) -> bool:
+        """Check if this turn passed."""
+        return self.status == GradeStatus.PASS
+
+    @property
+    def failed_grades(self) -> list[GradeResult]:
+        """Get all failed grades for this turn."""
+        return [g for g in self.grades if g.status == GradeStatus.FAIL]
+
+
 class EvaluationResult(BaseModel):
     """Complete result of evaluating a single test case."""
 
@@ -84,6 +106,10 @@ class EvaluationResult(BaseModel):
     status: GradeStatus
     grades: list[GradeResult] = Field(default_factory=list)
     metrics: list[MetricResult] = Field(default_factory=list)
+
+    # Multi-turn support
+    turn_results: list[TurnResult] = Field(default_factory=list)
+    failed_at_turn: int | None = None  # Which turn failed (for fail-fast)
 
     # Execution info
     duration_ms: float | None = None
@@ -112,6 +138,21 @@ class EvaluationResult(BaseModel):
         passed = sum(1 for g in self.grades if g.passed)
         return passed / len(self.grades)
 
+    @property
+    def is_multi_turn(self) -> bool:
+        """Check if this result is from a multi-turn conversation."""
+        return len(self.turn_results) > 1
+
+    @property
+    def turns_completed(self) -> int:
+        """Number of turns that were actually run (not skipped)."""
+        return sum(1 for t in self.turn_results if not t.skipped)
+
+    @property
+    def total_turns(self) -> int:
+        """Total number of turns in the test case."""
+        return len(self.turn_results)
+
     def add_grade(self, grade: GradeResult) -> None:
         """Add a grade result."""
         self.grades.append(grade)
@@ -124,6 +165,21 @@ class EvaluationResult(BaseModel):
     def add_metric(self, metric: MetricResult) -> None:
         """Add a metric result."""
         self.metrics.append(metric)
+
+    def add_turn_result(self, turn_result: TurnResult) -> None:
+        """Add a turn result."""
+        self.turn_results.append(turn_result)
+        # Add turn's grades to overall grades
+        for grade in turn_result.grades:
+            self.grades.append(grade)
+        # Update overall status
+        if turn_result.status == GradeStatus.ERROR:
+            self.status = GradeStatus.ERROR
+            self.failed_at_turn = turn_result.turn_index
+        elif turn_result.status == GradeStatus.FAIL and self.status != GradeStatus.ERROR:
+            self.status = GradeStatus.FAIL
+            if self.failed_at_turn is None:
+                self.failed_at_turn = turn_result.turn_index
 
 
 class SuiteResult(BaseModel):

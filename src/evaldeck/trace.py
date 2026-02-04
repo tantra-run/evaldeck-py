@@ -35,6 +35,13 @@ class TraceStatus(str, Enum):
     ERROR = "error"
 
 
+class Message(BaseModel):
+    """A message in a conversation."""
+
+    role: str  # "user" or "assistant"
+    content: str
+
+
 class TokenUsage(BaseModel):
     """Token usage for an LLM call."""
 

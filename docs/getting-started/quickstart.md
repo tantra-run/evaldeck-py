@@ -90,14 +90,14 @@ Create a test case in `tests/evals/`:
 ```yaml title="tests/evals/search_test.yaml"
 name: basic_search
 description: Agent should search and return results
-input: "Find restaurants near me"
-
-expected:
-  tools_called:
-    - search
-  output_contains:
-    - "restaurant"
-  task_completed: true
+turns:
+  - user: "Find restaurants near me"
+    expected:
+      tools_called:
+        - search
+      output_contains:
+        - "restaurant"
+      task_completed: true
 ```
 
 ## Run Evaluations
@@ -165,28 +165,28 @@ Here's a complete example evaluating a flight booking agent:
 ```yaml title="tests/evals/flight_booking.yaml"
 name: book_flight_basic
 description: Book a simple one-way flight
-input: "Book a flight from NYC to LA on March 15th"
+turns:
+  - user: "Book a flight from NYC to LA on March 15th"
+    expected:
+      # Required tools must be called
+      tools_called:
+        - search_flights
+        - book_flight
 
-expected:
-  # Required tools must be called
-  tools_called:
-    - search_flights
-    - book_flight
+      # These tools should NOT be called
+      tools_not_called:
+        - cancel_booking
 
-  # These tools should NOT be called
-  tools_not_called:
-    - cancel_booking
+      # Output must contain these strings
+      output_contains:
+        - "confirmation"
+        - "March 15"
 
-  # Output must contain these strings
-  output_contains:
-    - "confirmation"
-    - "March 15"
+      # Efficiency constraint
+      max_steps: 5
 
-  # Efficiency constraint
-  max_steps: 5
-
-  # Must complete successfully
-  task_completed: true
+      # Must complete successfully
+      task_completed: true
 
 tags:
   - booking

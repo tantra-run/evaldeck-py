@@ -60,16 +60,16 @@ Define what your agent should do in YAML:
 
 ```yaml title="tests/evals/booking.yaml"
 name: book_flight_basic
-input: "Book me a flight from NYC to LA on March 15th"
-
-expected:
-  tools_called:
-    - search_flights
-    - book_flight
-  output_contains:
-    - "confirmation"
-    - "March 15"
-  max_steps: 5
+turns:
+  - user: "Book me a flight from NYC to LA on March 15th"
+    expected:
+      tools_called:
+        - search_flights
+        - book_flight
+      output_contains:
+        - "confirmation"
+        - "March 15"
+      max_steps: 5
 ```
 
 Run the evaluation:

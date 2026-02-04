@@ -4,20 +4,18 @@ Test cases define what your agent should do and how to evaluate it. This guide c
 
 ## Test Case Structure
 
-A test case is a YAML file with the following structure:
+A test case is a YAML file with a `turns` array defining the conversation:
 
 ```yaml
 # Required fields
 name: unique_test_name
-input: "The input to send to your agent"
+turns:
+  - user: "The input to send to your agent"
+    expected:
+      tools_called: [...]
+      output_contains: [...]
 
-# Optional: what the agent should do
-expected:
-  tools_called: [...]
-  output_contains: [...]
-  # ... more expectations
-
-# Optional: custom graders
+# Optional: custom graders (applied to all turns)
 graders:
   - type: llm
     prompt: "..."
@@ -30,6 +28,45 @@ tags: [category, priority]
 metadata:
   custom_key: value
 ```
+
+## Single-Turn vs Multi-Turn
+
+### Single-Turn (Simple)
+
+For simple single-turn tests:
+
+```yaml
+name: book_flight_basic
+turns:
+  - user: "Book me a flight from NYC to LA"
+    expected:
+      tools_called: [search_flights, book_flight]
+      output_contains: ["confirmation"]
+```
+
+### Multi-Turn Conversations
+
+For multi-turn conversations, add multiple entries to `turns`:
+
+```yaml
+name: booking_conversation
+turns:
+  - user: "I want to book a flight"
+    expected:
+      output_contains: ["help", "where"]
+
+  - user: "NYC to LA on March 15"
+    expected:
+      tools_called: [search_flights]
+      output_contains: ["found", "flights"]
+
+  - user: "Book the cheapest one"
+    expected:
+      tools_called: [book_flight]
+      output_contains: ["confirmation"]
+```
+
+**Fail-fast behavior**: If any turn fails, subsequent turns are skipped. This is intentional—if turn 1 fails, the conversation context is broken.
 
 ## Required Fields
 
@@ -47,22 +84,30 @@ Best practices:
 - Be descriptive: `book_flight_roundtrip` not `test1`
 - Include the feature being tested
 
-### input
+### turns
 
-The input string sent to your agent:
+Array of conversation turns. Each turn has:
+
+- `user` (required): The user's message
+- `expected` (optional): Expected behavior for this turn
+- `graders` (optional): Turn-specific graders
 
 ```yaml
-input: "Book me a flight from NYC to LA on March 15th"
+turns:
+  - user: "Book me a flight from NYC to LA on March 15th"
+    expected:
+      tools_called: [search_flights, book_flight]
 ```
 
-For multi-line inputs:
+For multi-line user input:
 
 ```yaml
-input: |
-  I need to book a flight.
-  From: New York
-  To: Los Angeles
-  Date: March 15th
+turns:
+  - user: |
+      I need to book a flight.
+      From: New York
+      To: Los Angeles
+      Date: March 15th
 ```
 
 ## Expected Behavior
@@ -358,27 +403,30 @@ Use YAML document separators for multiple tests:
 # tests/evals/booking.yaml
 
 name: book_flight_basic
-input: "Book a flight to LA"
-expected:
-  tools_called: [book_flight]
+turns:
+  - user: "Book a flight to LA"
+    expected:
+      tools_called: [book_flight]
 tags: [booking, simple]
 
 ---
 
 name: book_flight_roundtrip
-input: "Book a roundtrip flight to LA"
-expected:
-  tools_called: [book_flight]
-  output_contains: ["roundtrip", "return"]
+turns:
+  - user: "Book a roundtrip flight to LA"
+    expected:
+      tools_called: [book_flight]
+      output_contains: ["roundtrip", "return"]
 tags: [booking, complex]
 
 ---
 
 name: book_flight_with_preferences
-input: "Book a flight to LA, window seat, vegetarian meal"
-expected:
-  tools_called: [book_flight, set_preferences]
-  output_contains: ["window", "vegetarian"]
+turns:
+  - user: "Book a flight to LA, window seat, vegetarian meal"
+    expected:
+      tools_called: [book_flight, set_preferences]
+      output_contains: ["window", "vegetarian"]
 tags: [booking, complex]
 ```
 
@@ -420,13 +468,17 @@ reference_tools:
 ```yaml
 # Good: focused test
 name: book_flight_validates_date
-expected:
-  output_not_contains: ["invalid date"]
+turns:
+  - user: "Book a flight for yesterday"
+    expected:
+      output_not_contains: ["invalid date"]
 
 # Avoid: testing too many things
 name: book_flight_everything
-expected:
-  tools_called: [search, filter, sort, book, confirm, notify]
+turns:
+  - user: "Book a flight"
+    expected:
+      tools_called: [search, filter, sort, book, confirm, notify]
 ```
 
 ### 2. Use Descriptive Names
@@ -462,8 +514,9 @@ name: booking_handles_sold_out_flight
 description: |
   Verifies the agent gracefully handles the case where
   the selected flight becomes unavailable during booking.
-input: "Book flight AA123"  # This flight is configured to be sold out
-expected:
-  output_contains: ["unavailable", "alternative"]
-  tools_not_called: [charge_payment]  # Should not charge if sold out
+turns:
+  - user: "Book flight AA123"  # This flight is configured to be sold out
+    expected:
+      output_contains: ["unavailable", "alternative"]
+      tools_not_called: [charge_payment]  # Should not charge if sold out
 ```

@@ -10,7 +10,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from evaldeck.trace import Trace
+    from evaldeck.trace import Message, Trace
 
 
 class LangChainIntegration:
@@ -60,7 +60,7 @@ class LangChainIntegration:
         self._agent = agent_factory()
         self._initialized = True
 
-    def run(self, input: str) -> Trace:
+    def run(self, input: str, history: list[Message] | None = None) -> Trace:
         """Run the agent and return a trace.
 
         Note: Agent invocations are serialized (one at a time) to ensure
@@ -68,6 +68,7 @@ class LangChainIntegration:
 
         Args:
             input: The input string to send to the agent.
+            history: Optional conversation history for multi-turn.
 
         Returns:
             Trace captured from the agent execution.
@@ -82,7 +83,7 @@ class LangChainIntegration:
             traces_before = set(self._processor._traces.keys())
 
             # Invoke the agent
-            self._invoke_agent(input)
+            self._invoke_agent(input, history)
 
             # Find the new trace created by this invocation
             traces_after = set(self._processor._traces.keys())
@@ -100,28 +101,40 @@ class LangChainIntegration:
 
             return trace
 
-    def _invoke_agent(self, input: str) -> Any:
+    def _invoke_agent(self, input: str, history: list[Message] | None = None) -> Any:
         """Invoke the agent with the appropriate format.
 
         Auto-detects LangGraph vs legacy LangChain format.
+
+        Args:
+            input: The user input for this turn.
+            history: Previous conversation history (user/assistant messages).
         """
+        # Build messages list from history + new input
+        messages: list[tuple[str, str]] = []
+        if history:
+            for msg in history:
+                role = "human" if msg.role == "user" else "ai"
+                messages.append((role, msg.content))
+        messages.append(("human", input))
+
         # LangGraph style (current)
         if hasattr(self._agent, "invoke"):
             # Try LangGraph message format first
             try:
-                return self._agent.invoke({"messages": [("human", input)]})
+                return self._agent.invoke({"messages": messages})
             except (TypeError, KeyError):
-                # Fall back to simple input
+                # Fall back to simple input (no history support)
                 try:
                     return self._agent.invoke({"input": input})
                 except (TypeError, KeyError):
                     return self._agent.invoke(input)
 
-        # Legacy LangChain style
+        # Legacy LangChain style (no history support)
         if hasattr(self._agent, "run"):
             return self._agent.run(input)
 
-        # Callable
+        # Callable (no history support)
         if callable(self._agent):
             return self._agent(input)
 
@@ -131,7 +144,9 @@ class LangChainIntegration:
         )
 
 
-def create_langchain_runner(agent_factory: Callable[[], Any]) -> Callable[[str], Trace]:
+def create_langchain_runner(
+    agent_factory: Callable[[], Any],
+) -> Callable[[str, list[Message] | None], Trace]:
     """Create a runner function for LangChain agents.
 
     This is the main entry point used by evaldeck's EvaluationRunner.
@@ -140,7 +155,7 @@ def create_langchain_runner(agent_factory: Callable[[], Any]) -> Callable[[str],
         agent_factory: Function that returns the agent instance.
 
     Returns:
-        A function that takes input and returns a Trace.
+        A function that takes input and optional history, returns a Trace.
     """
     integration = LangChainIntegration()
     integration.setup(agent_factory)

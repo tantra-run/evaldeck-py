@@ -14,6 +14,7 @@ from evaldeck import (
     GradeStatus,
     Step,
     Trace,
+    Turn,
 )
 
 
@@ -61,12 +62,16 @@ class TestEvaluator:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(
-                output_contains=["keyword"],
-                tools_called=["tool1"],
-                max_steps=10,
-            ),
+            turns=[
+                Turn(
+                    user="test",
+                    expected=ExpectedBehavior(
+                        output_contains=["keyword"],
+                        tools_called=["tool1"],
+                        max_steps=10,
+                    ),
+                )
+            ],
         )
 
         evaluator = Evaluator()
@@ -83,7 +88,7 @@ class TestEvaluator:
         from evaldeck.graders import ContainsGrader
 
         trace = Trace(input="test", output="custom output")
-        test_case = EvalCase(name="test", input="test")
+        test_case = EvalCase(name="test", turns=[Turn(user="test")])
 
         custom_grader = ContainsGrader(values=["custom"])
         evaluator = Evaluator(graders=[custom_grader])
@@ -112,8 +117,7 @@ class TestEvaluatorEdgeCases:
         trace = Trace(input="test", output="")
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(task_completed=True),
+            turns=[Turn(user="test", expected=ExpectedBehavior(task_completed=True))],
         )
 
         evaluator = Evaluator()
@@ -125,7 +129,7 @@ class TestEvaluatorEdgeCases:
     def test_no_expected_behavior(self) -> None:
         """Test evaluating with no expected behavior defined."""
         trace = Trace(input="test", output="some output")
-        test_case = EvalCase(name="test", input="test")
+        test_case = EvalCase(name="test", turns=[Turn(user="test")])
 
         evaluator = Evaluator()
         result = evaluator.evaluate(trace, test_case)
@@ -141,8 +145,7 @@ class TestEvaluatorEdgeCases:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(task_completed=True),
+            turns=[Turn(user="test", expected=ExpectedBehavior(task_completed=True))],
         )
 
         evaluator = Evaluator()
@@ -184,7 +187,7 @@ class TestAsyncGraders:
         graders = [SlowGrader(0.05, i) for i in range(3)]
 
         trace = Trace(input="test", output="result")
-        test_case = EvalCase(name="test", input="test")
+        test_case = EvalCase(name="test", turns=[Turn(user="test")])
 
         evaluator = Evaluator(graders=graders)
 
@@ -206,7 +209,7 @@ class TestAsyncGraders:
 
         grader = ContainsGrader(values=["hello"])
         trace = Trace(input="test", output="hello world")
-        test_case = EvalCase(name="test", input="test")
+        test_case = EvalCase(name="test", turns=[Turn(user="test")])
 
         # Async call should work using the default wrapper
         result = await grader.grade_async(trace, test_case)
@@ -243,7 +246,7 @@ class TestAsyncGraders:
         composite = CompositeGrader(graders)
 
         trace = Trace(input="test", output="result")
-        test_case = EvalCase(name="test", input="test")
+        test_case = EvalCase(name="test", turns=[Turn(user="test")])
 
         result = await composite.grade_async(trace, test_case)
 
@@ -257,16 +260,17 @@ class TestConcurrentExecution:
 
     def test_evaluate_suite_with_sync_agent(self) -> None:
         """Test evaluate_suite with sync agent function."""
+        from evaldeck.trace import Message
 
-        def sync_agent(input: str) -> Trace:
+        def sync_agent(input: str, history: list[Message] | None = None) -> Trace:
             trace = Trace(input=input, output=f"Response to: {input}")
             return trace
 
         suite = EvalSuite(
             name="test_suite",
             test_cases=[
-                EvalCase(name="test1", input="hello"),
-                EvalCase(name="test2", input="world"),
+                EvalCase(name="test1", turns=[Turn(user="hello")]),
+                EvalCase(name="test2", turns=[Turn(user="world")]),
             ],
         )
 
@@ -279,8 +283,9 @@ class TestConcurrentExecution:
     @pytest.mark.asyncio
     async def test_evaluate_suite_async_with_async_agent(self) -> None:
         """Test evaluate_suite_async with async agent function."""
+        from evaldeck.trace import Message
 
-        async def async_agent(input: str) -> Trace:
+        async def async_agent(input: str, history: list[Message] | None = None) -> Trace:
             await asyncio.sleep(0.01)  # Simulate async work
             trace = Trace(input=input, output=f"Response to: {input}")
             return trace
@@ -288,8 +293,8 @@ class TestConcurrentExecution:
         suite = EvalSuite(
             name="test_suite",
             test_cases=[
-                EvalCase(name="test1", input="hello"),
-                EvalCase(name="test2", input="world"),
+                EvalCase(name="test1", turns=[Turn(user="hello")]),
+                EvalCase(name="test2", turns=[Turn(user="world")]),
             ],
         )
 
@@ -302,15 +307,19 @@ class TestConcurrentExecution:
     @pytest.mark.asyncio
     async def test_concurrent_execution_faster_than_sequential(self) -> None:
         """Test that concurrent execution is faster than sequential."""
+        from evaldeck.trace import Message
+
         delay = 0.05  # 50ms per test
 
-        async def slow_agent(input: str) -> Trace:
+        async def slow_agent(input: str, history: list[Message] | None = None) -> Trace:
             await asyncio.sleep(delay)
             return Trace(input=input, output="done")
 
         suite = EvalSuite(
             name="test_suite",
-            test_cases=[EvalCase(name=f"test{i}", input=f"input{i}") for i in range(5)],
+            test_cases=[
+                EvalCase(name=f"test{i}", turns=[Turn(user=f"input{i}")]) for i in range(5)
+            ],
         )
 
         evaluator = Evaluator()
@@ -328,10 +337,12 @@ class TestConcurrentExecution:
     @pytest.mark.asyncio
     async def test_max_concurrent_limits_parallelism(self) -> None:
         """Test that max_concurrent limits the number of parallel tests."""
+        from evaldeck.trace import Message
+
         active_count = 0
         max_seen = 0
 
-        async def counting_agent(input: str) -> Trace:
+        async def counting_agent(input: str, history: list[Message] | None = None) -> Trace:
             nonlocal active_count, max_seen
             active_count += 1
             max_seen = max(max_seen, active_count)
@@ -341,7 +352,9 @@ class TestConcurrentExecution:
 
         suite = EvalSuite(
             name="test_suite",
-            test_cases=[EvalCase(name=f"test{i}", input=f"input{i}") for i in range(10)],
+            test_cases=[
+                EvalCase(name=f"test{i}", turns=[Turn(user=f"input{i}")]) for i in range(10)
+            ],
         )
 
         evaluator = Evaluator()
@@ -355,14 +368,18 @@ class TestConcurrentExecution:
         """Test that results maintain original test case order."""
         import random
 
-        async def random_delay_agent(input: str) -> Trace:
+        from evaldeck.trace import Message
+
+        async def random_delay_agent(input: str, history: list[Message] | None = None) -> Trace:
             # Random delay so completion order differs from input order
             await asyncio.sleep(random.uniform(0.001, 0.02))
             return Trace(input=input, output=input)
 
         suite = EvalSuite(
             name="test_suite",
-            test_cases=[EvalCase(name=f"test{i}", input=f"input{i}") for i in range(10)],
+            test_cases=[
+                EvalCase(name=f"test{i}", turns=[Turn(user=f"input{i}")]) for i in range(10)
+            ],
         )
 
         evaluator = Evaluator()
@@ -375,20 +392,22 @@ class TestConcurrentExecution:
     @pytest.mark.asyncio
     async def test_on_result_callback_called_for_each_test(self) -> None:
         """Test that on_result callback is called for each test."""
+        from evaldeck.trace import Message
+
         results_received: list[str] = []
 
         def on_result(result) -> None:
             results_received.append(result.test_case_name)
 
-        async def agent(input: str) -> Trace:
+        async def agent(input: str, history: list[Message] | None = None) -> Trace:
             return Trace(input=input, output="done")
 
         suite = EvalSuite(
             name="test_suite",
             test_cases=[
-                EvalCase(name="test1", input="a"),
-                EvalCase(name="test2", input="b"),
-                EvalCase(name="test3", input="c"),
+                EvalCase(name="test1", turns=[Turn(user="a")]),
+                EvalCase(name="test2", turns=[Turn(user="b")]),
+                EvalCase(name="test3", turns=[Turn(user="c")]),
             ],
         )
 
@@ -401,8 +420,9 @@ class TestConcurrentExecution:
     @pytest.mark.asyncio
     async def test_error_in_one_test_doesnt_affect_others(self) -> None:
         """Test that an error in one test doesn't stop others."""
+        from evaldeck.trace import Message
 
-        async def failing_agent(input: str) -> Trace:
+        async def failing_agent(input: str, history: list[Message] | None = None) -> Trace:
             if "fail" in input:
                 raise ValueError("Intentional failure")
             return Trace(input=input, output="success")
@@ -410,9 +430,9 @@ class TestConcurrentExecution:
         suite = EvalSuite(
             name="test_suite",
             test_cases=[
-                EvalCase(name="test1", input="pass"),
-                EvalCase(name="test2", input="fail"),
-                EvalCase(name="test3", input="pass"),
+                EvalCase(name="test1", turns=[Turn(user="pass")]),
+                EvalCase(name="test2", turns=[Turn(user="fail")]),
+                EvalCase(name="test3", turns=[Turn(user="pass")]),
             ],
         )
 
@@ -426,4 +446,5 @@ class TestConcurrentExecution:
         # Check the error result
         error_result = next(r for r in result.results if r.test_case_name == "test2")
         assert error_result.status == GradeStatus.ERROR
-        assert "Intentional failure" in error_result.error
+        # Error message is in the grade message for multi-turn evaluation
+        assert any("Intentional failure" in g.message for g in error_result.grades if g.message)

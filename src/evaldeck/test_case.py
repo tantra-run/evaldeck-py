@@ -34,6 +34,14 @@ class ExpectedBehavior(BaseModel):
     custom: dict[str, Any] | None = None
 
 
+class Turn(BaseModel):
+    """A single turn in a conversation."""
+
+    user: str
+    expected: ExpectedBehavior | None = None
+    graders: list[GraderConfig] = Field(default_factory=list)
+
+
 class GraderConfig(BaseModel):
     """Configuration for a grader."""
 
@@ -53,15 +61,30 @@ class GraderConfig(BaseModel):
 class EvalCase(BaseModel):
     """A test case for evaluating an agent.
 
-    Test cases define an input to send to the agent and the expected
-    behavior/output to validate against.
+    Test cases define conversation turns to send to the agent and the expected
+    behavior/output to validate against for each turn.
+
+    Example:
+        Single turn:
+            turns:
+              - user: "Book a flight to NYC"
+                expected:
+                  tools_called: [search_flights, book_flight]
+
+        Multi-turn:
+            turns:
+              - user: "I want to book a flight"
+              - user: "NYC to LA, March 15"
+                expected:
+                  tools_called: [search_flights]
+              - user: "Book the cheapest one"
+                expected:
+                  tools_called: [book_flight]
     """
 
     name: str
     description: str | None = None
-    input: str
-    expected: ExpectedBehavior = Field(default_factory=ExpectedBehavior)
-    graders: list[GraderConfig] = Field(default_factory=list)
+    turns: list[Turn] = Field(default_factory=list)
 
     # Execution config
     timeout: float | None = None
@@ -74,6 +97,32 @@ class EvalCase(BaseModel):
     # Reference data (for grading)
     reference_output: str | None = None
     reference_tools: list[str] | None = None
+
+    @property
+    def is_multi_turn(self) -> bool:
+        """Check if this is a multi-turn conversation."""
+        return len(self.turns) > 1
+
+    @property
+    def expected(self) -> ExpectedBehavior:
+        """Get expected behavior from first turn (for backward compat with graders)."""
+        if self.turns and self.turns[0].expected:
+            return self.turns[0].expected
+        return ExpectedBehavior()
+
+    @property
+    def graders(self) -> list[GraderConfig]:
+        """Get graders from first turn (for backward compat)."""
+        if self.turns:
+            return self.turns[0].graders
+        return []
+
+    @property
+    def input(self) -> str:
+        """Get input from first turn (for backward compat)."""
+        if self.turns:
+            return self.turns[0].user
+        return ""
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> EvalCase:
@@ -91,19 +140,36 @@ class EvalCase(BaseModel):
     @classmethod
     def _from_dict(cls, data: dict[str, Any]) -> EvalCase:
         """Create test case from dictionary, handling nested structures."""
-        # Handle expected behavior
-        if "expected" in data and isinstance(data["expected"], dict):
-            data["expected"] = ExpectedBehavior(**data["expected"])
+        # Backward compatibility: convert old 'input' format to 'turns'
+        if "input" in data and "turns" not in data:
+            turn_data: dict[str, Any] = {"user": data.pop("input")}
+            if "expected" in data:
+                turn_data["expected"] = data.pop("expected")
+            if "graders" in data:
+                turn_data["graders"] = data.pop("graders")
+            data["turns"] = [turn_data]
 
-        # Handle graders
-        if "graders" in data:
-            graders = []
-            for g in data["graders"]:
-                if isinstance(g, dict):
-                    graders.append(GraderConfig(**g))
+        # Handle turns
+        if "turns" in data:
+            turns = []
+            for t in data["turns"]:
+                if isinstance(t, dict):
+                    # Handle nested expected behavior
+                    if "expected" in t and isinstance(t["expected"], dict):
+                        t["expected"] = ExpectedBehavior(**t["expected"])
+                    # Handle nested graders
+                    if "graders" in t:
+                        graders = []
+                        for g in t["graders"]:
+                            if isinstance(g, dict):
+                                graders.append(GraderConfig(**g))
+                            else:
+                                graders.append(g)
+                        t["graders"] = graders
+                    turns.append(Turn(**t))
                 else:
-                    graders.append(g)
-            data["graders"] = graders
+                    turns.append(t)
+            data["turns"] = turns
 
         return cls(**data)
 

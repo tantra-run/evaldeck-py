@@ -52,19 +52,23 @@ trace.complete(output="Your flight AA123 from NYC to LA on March 15 is booked. C
 ### In Python
 
 ```python
-from evaldeck import EvalCase, ExpectedBehavior
+from evaldeck import EvalCase, ExpectedBehavior, Turn
 
 test_case = EvalCase(
     name="book_flight_basic",
     description="Book a simple one-way flight",
-    input="Book a flight from NYC to LA on March 15",
-    expected=ExpectedBehavior(
-        tools_called=["search_flights", "book_flight"],
-        tools_not_called=["cancel_booking"],
-        output_contains=["confirmation", "ABC123"],
-        max_steps=5,
-        task_completed=True
-    ),
+    turns=[
+        Turn(
+            user="Book a flight from NYC to LA on March 15",
+            expected=ExpectedBehavior(
+                tools_called=["search_flights", "book_flight"],
+                tools_not_called=["cancel_booking"],
+                output_contains=["confirmation", "ABC123"],
+                max_steps=5,
+                task_completed=True
+            ),
+        )
+    ],
     tags=["booking", "critical"]
 )
 ```
@@ -75,19 +79,19 @@ test_case = EvalCase(
 # tests/evals/book_flight_basic.yaml
 name: book_flight_basic
 description: Book a simple one-way flight
-input: "Book a flight from NYC to LA on March 15"
-
-expected:
-  tools_called:
-    - search_flights
-    - book_flight
-  tools_not_called:
-    - cancel_booking
-  output_contains:
-    - "confirmation"
-    - "ABC123"
-  max_steps: 5
-  task_completed: true
+turns:
+  - user: "Book a flight from NYC to LA on March 15"
+    expected:
+      tools_called:
+        - search_flights
+        - book_flight
+      tools_not_called:
+        - cancel_booking
+      output_contains:
+        - "confirmation"
+        - "ABC123"
+      max_steps: 5
+      task_completed: true
 
 tags:
   - booking
@@ -170,7 +174,7 @@ print(f"Pass rate: {suite_result.pass_rate:.1%}")
 
 from evaldeck import (
     Trace, Step, TokenUsage,
-    EvalCase, ExpectedBehavior,
+    EvalCase, ExpectedBehavior, Turn,
     Evaluator
 )
 
@@ -217,12 +221,16 @@ def main():
     # Define test
     test = EvalCase(
         name="booking_test",
-        input="Book a flight from NYC to LA",
-        expected=ExpectedBehavior(
-            tools_called=["search_flights", "book_flight"],
-            output_contains=["confirmation", "ABC123"],
-            max_steps=5
-        )
+        turns=[
+            Turn(
+                user="Book a flight from NYC to LA",
+                expected=ExpectedBehavior(
+                    tools_called=["search_flights", "book_flight"],
+                    output_contains=["confirmation", "ABC123"],
+                    max_steps=5
+                )
+            )
+        ]
     )
 
     # Run agent

@@ -20,34 +20,33 @@ Let's explore each step.
 
 A test case specifies:
 
-- **Input**: What to send to your agent
-- **Expected behavior**: What should happen
+- **Turns**: The conversation (user messages and expected behaviors)
 - **Graders**: How to evaluate (optional)
 
 ```yaml title="tests/evals/weather_check.yaml"
 name: get_weather_forecast
 description: Agent should fetch and present weather data
 
-input: "What's the weather like in San Francisco tomorrow?"
+turns:
+  - user: "What's the weather like in San Francisco tomorrow?"
+    expected:
+      # Tool expectations
+      tools_called:
+        - get_weather
+      tools_not_called:
+        - book_flight  # Irrelevant for this task
 
-expected:
-  # Tool expectations
-  tools_called:
-    - get_weather
-  tools_not_called:
-    - book_flight  # Irrelevant for this task
+      # Output expectations
+      output_contains:
+        - "San Francisco"
+        - "tomorrow"
+      output_not_contains:
+        - "error"
+        - "unable"
 
-  # Output expectations
-  output_contains:
-    - "San Francisco"
-    - "tomorrow"
-  output_not_contains:
-    - "error"
-    - "unable"
-
-  # Performance expectations
-  max_steps: 3
-  task_completed: true
+      # Performance expectations
+      max_steps: 3
+      task_completed: true
 
 tags:
   - weather
@@ -203,11 +202,11 @@ For subjective evaluation, add an LLM grader:
 
 ```yaml title="tests/evals/weather_check.yaml"
 name: get_weather_forecast
-input: "What's the weather like in San Francisco tomorrow?"
-
-expected:
-  tools_called:
-    - get_weather
+turns:
+  - user: "What's the weather like in San Francisco tomorrow?"
+    expected:
+      tools_called:
+        - get_weather
 
 # Add LLM grading
 graders:
@@ -266,16 +265,18 @@ Create separate test cases for edge cases:
 ```yaml
 # Normal case
 name: weather_valid_city
-input: "Weather in New York"
-expected:
-  task_completed: true
+turns:
+  - user: "Weather in New York"
+    expected:
+      task_completed: true
 
 ---
 # Edge case
 name: weather_invalid_city
-input: "Weather in Atlantis"
-expected:
-  output_contains: ["not found", "unknown"]
+turns:
+  - user: "Weather in Atlantis"
+    expected:
+      output_contains: ["not found", "unknown"]
 ```
 
 ## Next Steps

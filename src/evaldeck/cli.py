@@ -312,7 +312,7 @@ def create(
     tools: tuple[str, ...],
 ) -> None:
     """Create a new test case."""
-    from evaldeck.test_case import EvalCase, ExpectedBehavior
+    from evaldeck.test_case import EvalCase, ExpectedBehavior, Turn
 
     expected = ExpectedBehavior(
         output_contains=list(output_contains) if output_contains else None,
@@ -321,8 +321,7 @@ def create(
 
     test_case = EvalCase(
         name=name,
-        input=input_text,
-        expected=expected,
+        turns=[Turn(user=input_text, expected=expected)],
     )
 
     console.print(test_case.to_yaml())

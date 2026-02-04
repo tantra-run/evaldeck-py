@@ -1,6 +1,6 @@
 """Tests for graders module."""
 
-from evaldeck import EvalCase, ExpectedBehavior, Step, Trace
+from evaldeck import EvalCase, ExpectedBehavior, Step, Trace, Turn
 from evaldeck.graders import (
     CompositeGrader,
     ContainsGrader,
@@ -19,8 +19,7 @@ class TestContainsGrader:
         trace = Trace(input="test", output="Hello world, this is a test")
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(output_contains=["hello", "test"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(output_contains=["hello", "test"]))],
         )
 
         grader = ContainsGrader()
@@ -33,8 +32,9 @@ class TestContainsGrader:
         trace = Trace(input="test", output="Hello world")
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(output_contains=["hello", "goodbye"]),
+            turns=[
+                Turn(user="test", expected=ExpectedBehavior(output_contains=["hello", "goodbye"]))
+            ],
         )
 
         grader = ContainsGrader()
@@ -48,8 +48,7 @@ class TestContainsGrader:
         trace = Trace(input="test", output="HELLO WORLD")
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(output_contains=["hello"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(output_contains=["hello"]))],
         )
 
         grader = ContainsGrader()
@@ -62,8 +61,7 @@ class TestContainsGrader:
         trace = Trace(input="test", output="specific content here")
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(output_contains=["other"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(output_contains=["other"]))],
         )
 
         grader = ContainsGrader(values=["specific"])
@@ -83,8 +81,7 @@ class TestToolCalledGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(tools_called=["search", "book"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(tools_called=["search", "book"]))],
         )
 
         grader = ToolCalledGrader()
@@ -99,8 +96,7 @@ class TestToolCalledGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(tools_called=["search", "book"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(tools_called=["search", "book"]))],
         )
 
         grader = ToolCalledGrader()
@@ -118,8 +114,7 @@ class TestToolCalledGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(tools_called=["search", "book"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(tools_called=["search", "book"]))],
         )
 
         grader = ToolCalledGrader()
@@ -138,8 +133,9 @@ class TestToolNotCalledGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(tools_not_called=["delete", "cancel"]),
+            turns=[
+                Turn(user="test", expected=ExpectedBehavior(tools_not_called=["delete", "cancel"]))
+            ],
         )
 
         grader = ToolNotCalledGrader()
@@ -155,8 +151,7 @@ class TestToolNotCalledGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(tools_not_called=["delete"]),
+            turns=[Turn(user="test", expected=ExpectedBehavior(tools_not_called=["delete"]))],
         )
 
         grader = ToolNotCalledGrader()
@@ -176,8 +171,7 @@ class TestMaxStepsGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(max_steps=5),
+            turns=[Turn(user="test", expected=ExpectedBehavior(max_steps=5))],
         )
 
         grader = MaxStepsGrader()
@@ -193,8 +187,7 @@ class TestMaxStepsGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(max_steps=5),
+            turns=[Turn(user="test", expected=ExpectedBehavior(max_steps=5))],
         )
 
         grader = MaxStepsGrader()
@@ -213,11 +206,15 @@ class TestCompositeGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(
-                output_contains=["hello"],
-                tools_called=["search", "missing"],
-            ),
+            turns=[
+                Turn(
+                    user="test",
+                    expected=ExpectedBehavior(
+                        output_contains=["hello"],
+                        tools_called=["search", "missing"],
+                    ),
+                )
+            ],
         )
 
         graders = [ContainsGrader(), ToolCalledGrader()]
@@ -233,11 +230,15 @@ class TestCompositeGrader:
 
         test_case = EvalCase(
             name="test",
-            input="test",
-            expected=ExpectedBehavior(
-                output_contains=["hello"],
-                tools_called=["missing"],
-            ),
+            turns=[
+                Turn(
+                    user="test",
+                    expected=ExpectedBehavior(
+                        output_contains=["hello"],
+                        tools_called=["missing"],
+                    ),
+                )
+            ],
         )
 
         graders = [ContainsGrader(), ToolCalledGrader()]

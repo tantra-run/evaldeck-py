@@ -3,7 +3,7 @@
 Evaldeck helps you answer one question: "Is my agent actually working?"
 
 Basic usage:
-    from evaldeck import Trace, Step, Evaluator, EvalCase
+    from evaldeck import Trace, Step, Evaluator, EvalCase, Turn, ExpectedBehavior
 
     # Create a trace (or capture with LangChain adapter)
     trace = Trace(
@@ -15,14 +15,34 @@ Basic usage:
         output="Booked flight 123 to NYC",
     )
 
-    # Define test case
+    # Define test case (single turn)
     test_case = EvalCase(
         name="book_flight",
-        input="Book a flight to NYC",
-        expected=ExpectedBehavior(
-            tools_called=["search_flights", "book_flight"],
-            output_contains=["booked"],
-        ),
+        turns=[
+            Turn(
+                user="Book a flight to NYC",
+                expected=ExpectedBehavior(
+                    tools_called=["search_flights", "book_flight"],
+                    output_contains=["booked"],
+                ),
+            ),
+        ],
+    )
+
+    # Multi-turn conversation
+    multi_turn_case = EvalCase(
+        name="booking_conversation",
+        turns=[
+            Turn(user="I want to book a flight"),
+            Turn(
+                user="NYC to LA on March 15",
+                expected=ExpectedBehavior(tools_called=["search_flights"]),
+            ),
+            Turn(
+                user="Book the cheapest one",
+                expected=ExpectedBehavior(tools_called=["book_flight"]),
+            ),
+        ],
     )
 
     # Evaluate
@@ -46,8 +66,10 @@ from evaldeck.test_case import (
     EvalSuite,
     ExpectedBehavior,
     GraderConfig,
+    Turn,
 )
 from evaldeck.trace import (
+    Message,
     Step,
     StepStatus,
     StepType,
@@ -68,11 +90,13 @@ __all__ = [
     "StepStatus",
     "TraceStatus",
     "TokenUsage",
+    "Message",
     # Test Case
     "EvalCase",
     "EvalSuite",
     "ExpectedBehavior",
     "GraderConfig",
+    "Turn",
     # Results
     "GradeResult",
     "GradeStatus",

@@ -198,25 +198,24 @@ def generate_example_test() -> str:
 name: example_test
 description: An example test case to get you started
 
-# Input to send to the agent
-input: "Hello, can you help me with a simple task?"
+# Conversation turns
+turns:
+  - user: "Hello, can you help me with a simple task?"
+    expected:
+      # Tools that must be called (if any)
+      # tools_called:
+      #   - search
+      #   - calculate
 
-# Expected behavior
-expected:
-  # Tools that must be called (if any)
-  # tools_called:
-  #   - search
-  #   - calculate
+      # Output must contain these strings
+      output_contains:
+        - "help"
 
-  # Output must contain these strings
-  output_contains:
-    - "help"
+      # Maximum steps allowed
+      max_steps: 10
 
-  # Maximum steps allowed
-  max_steps: 10
-
-  # Task must complete successfully
-  task_completed: true
+      # Task must complete successfully
+      task_completed: true
 
 # Optional: Custom graders
 # graders:
